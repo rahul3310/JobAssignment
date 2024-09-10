@@ -101,6 +101,20 @@ dependencies {
     //Coroutines
     implementation (libs.kotlinx.coroutines.core)
     implementation (libs.kotlinx.coroutines.android)
+    // Room components
+    implementation("androidx.room:room-runtime:2.5.0")
+    kapt("androidx.room:room-compiler:2.5.0")
+
+    // Kotlin extensions for Room
+    implementation("androidx.room:room-ktx:2.5.0")
+
+    // ViewModel and LiveData
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.0")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.0")
+
+    // Jetpack Compose (if not already included)
+    implementation("androidx.compose.ui:ui:1.5.0")
+    implementation("androidx.compose.runtime:runtime-livedata:1.5.0")
 
 
 

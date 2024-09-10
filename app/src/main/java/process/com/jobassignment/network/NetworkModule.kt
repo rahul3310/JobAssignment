@@ -1,14 +1,17 @@
 package process.com.jobassignment.network
 
+import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import process.com.jobassignment.api.ApiServices
+import process.com.jobassignment.localDb.JobDatabase
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
@@ -63,6 +66,12 @@ class NetworkModule @Inject constructor() {
         okHttpClient: OkHttpClient
     ): ApiServices {
         return retrofitBuilder.client(okHttpClient).build().create(ApiServices::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun providesJobDatabase(context : Context) : JobDatabase{
+        return JobDatabase.getDatabase(context = context)
     }
 
 }
