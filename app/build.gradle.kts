@@ -83,8 +83,25 @@ dependencies {
     implementation (libs.logging.interceptor)
 
     //for Hilt
-    implementation (libs.hilt.android)
+    implementation(libs.hilt.android.v244)
+    kapt (libs.hilt.compiler.v244)
     implementation (libs.androidx.work.runtime.ktx)
-    kapt (libs.hilt.compiler)
+    // Jetpack Compose and Hilt integration
+    implementation (libs.androidx.hilt.navigation.compose)
+
+    //navigation
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.navigation.runtime.ktx)
+
+    // ViewModel
+    implementation (libs.androidx.lifecycle.viewmodel.ktx)
+    // ViewModel utilities for Compose
+    implementation (libs.androidx.lifecycle.viewmodel.compose)
+
+    //Coroutines
+    implementation (libs.kotlinx.coroutines.core)
+    implementation (libs.kotlinx.coroutines.android)
+
+
 
 }
