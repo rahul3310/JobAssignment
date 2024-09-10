@@ -1,6 +1,7 @@
 package process.com.jobassignment.ui.utils
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
@@ -25,30 +27,32 @@ import process.com.jobassignment.datamodels.Job
 
 @Composable
 fun PaginatedLazyColumn(
+    modifier: Modifier,
     items: List<Job>,
     onLoadMore: () -> Unit,
     isLoading: Boolean,
     isError: Boolean,
     isEmpty: Boolean,
     onRetry: () -> Unit,
+    content: @Composable LazyItemScope.(Int, Job) -> Unit
 ) {
     val scrollState = rememberLazyListState()
 
     when {
-        isLoading && items.isEmpty() ==true -> {
+        isLoading && items.isEmpty() -> {
             // Loading state when no items are loaded
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator()
             }
         }
 
-        isError && items.isEmpty() == true -> {
+        isError && items.isEmpty() -> {
             // Error state when no items are loaded
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -64,7 +68,7 @@ fun PaginatedLazyColumn(
         isEmpty -> {
             // Empty state
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 Text(text = "No items available.")
@@ -75,14 +79,14 @@ fun PaginatedLazyColumn(
             // Main content with pagination
             LazyColumn(
                 state = scrollState,
-                contentPadding = PaddingValues(16.dp)
+                modifier = modifier
             ) {
-                itemsIndexed(items){index, item ->
-                    Text(text = item.title?:"NA")
+                itemsIndexed(items) { index, item ->
+                   content(index,item)
                 }
 
                 // Show a loading indicator at the bottom if loading more data
-                if (isLoading && items?.isNotEmpty()==true) {
+                if (isLoading && items?.isNotEmpty() == true) {
                     item {
                         Box(
                             modifier = Modifier
@@ -96,10 +100,10 @@ fun PaginatedLazyColumn(
                 }
 
                 // Error message at the bottom when there is an error during pagination
-                if (isError && items?.isNotEmpty()==true) {
+                if (isError && items?.isNotEmpty() == true) {
                     item {
                         Box(
-                            modifier = Modifier
+                            modifier = modifier
                                 .fillMaxWidth()
                                 .padding(16.dp),
                             contentAlignment = Alignment.Center

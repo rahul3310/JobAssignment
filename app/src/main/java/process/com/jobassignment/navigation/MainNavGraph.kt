@@ -12,9 +12,8 @@ import process.com.jobassignment.viewmodels.JobDetailsViewModel
 @Composable
 fun MainNavGraph(navController: NavHostController) {
     NavHost(navController = navController, startDestination = Routes.JobsScreen.routes) {
-        composable(Routes.JobsScreen.routes) {backEntry->
-            val jobDetailsViewModel: JobDetailsViewModel = hiltViewModel(backEntry)
-            JobsScreen(navController, jobDetailsViewModel)
+        composable(Routes.JobsScreen.routes) {
+            JobsScreen(navController)
         }
         composable(Routes.BookmarksScreen.routes) {
             BookmarksScreen(navController)
