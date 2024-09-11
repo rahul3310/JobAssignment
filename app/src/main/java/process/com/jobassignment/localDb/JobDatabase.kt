@@ -1,5 +1,6 @@
-package process.com.jobassignment.localDb
 
+package process.com.jobassignment.localDb
+/*
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
@@ -28,3 +29,4 @@ abstract class JobDatabase : RoomDatabase() {
     }
 }
 
+*/

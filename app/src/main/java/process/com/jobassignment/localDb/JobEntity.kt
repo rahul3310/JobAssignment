@@ -1,5 +1,6 @@
-package process.com.jobassignment.localDb
 
+package process.com.jobassignment.localDb
+/*
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.Ignore
@@ -139,3 +140,4 @@ data class V3Detail(
 )
 
 
+*/

@@ -24,11 +24,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import process.com.jobassignment.navigation.MainNavGraph
 import process.com.jobassignment.ui.theme.JobAssignmentTheme
 import process.com.jobassignment.ui.utils.BottomBar
-import process.com.jobassignment.viewmodels.JobDetailsViewModel
+import process.com.jobassignment.ui.utils.TopAppBarCustom
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, true)
@@ -37,11 +36,15 @@ class MainActivity : ComponentActivity() {
             JobAssignmentTheme {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
+                    topBar = {
+                        TopAppBarCustom(titleText = "Jobs",
+                            onBackClick = { finish() })
+                    },
                     bottomBar = {
                         BottomBar(navController)
                     }
                 ) {
-                    Box(modifier = Modifier.padding(0.dp)) {
+                    Box(modifier = Modifier.padding(it)) {
                         MainNavGraph(navController)
                     }
                 }
@@ -49,7 +52,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun finishMethod(){
+    fun finishMethod() {
         finish()
     }
 }

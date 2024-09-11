@@ -1,13 +1,12 @@
 package process.com.jobassignment.ui.screens
 
-import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -15,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,15 +24,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.paging.compose.collectAsLazyPagingItems
 import process.com.jobassignment.MainActivity
 import process.com.jobassignment.R
-import process.com.jobassignment.navigation.Routes
-import process.com.jobassignment.ui.theme.PurpleGrey40
+import process.com.jobassignment.extensionfunctions.toast
 import process.com.jobassignment.ui.utils.PaginatedLazyColumn
 import process.com.jobassignment.ui.utils.TopAppBarCustom
 import process.com.jobassignment.viewmodels.JobDetailsViewModel
@@ -45,44 +42,49 @@ fun JobsScreen(
     navController: NavHostController,
     jobDetailsViewModel: JobDetailsViewModel = hiltViewModel()
 ) {
-    val activity = LocalContext.current as MainActivity
 
+    val context = LocalContext.current
+    val jobsPagingData = jobDetailsViewModel.jobsPagerData.collectAsLazyPagingItems()
 
     Scaffold(
-        topBar = {
-            TopAppBarCustom(titleText = "Jobs",
-                onBackClick = { activity.finishMethod() })
-        }
     ) {
         PaginatedLazyColumn(
             modifier = Modifier.padding(it),
-            items = jobDetailsViewModel.jobDetailsList.value.results,
-            onLoadMore = { jobDetailsViewModel.updateCurrentPage(jobDetailsViewModel.currentPage.value + 1) },
-            isLoading = jobDetailsViewModel.isLoading.value,
-            isError = jobDetailsViewModel.isError.value,
-            onRetry = { jobDetailsViewModel.updateCurrentPage(jobDetailsViewModel.currentPage.value) },
-            isEmpty = jobDetailsViewModel.jobDetailsList.value.results.isEmpty(),
-        ) { _, item ->
+            pagingData = jobsPagingData
+        ) { _, job ->
             JobDetailCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp, start = 16.dp, end = 16.dp),
-                jobTitle = item.title ?: "NA",
-                jobLocation = item.jobLocationSlug ?: "NA",
-                salaryText = item.primaryDetails?.salary ?: "NA"
+                jobTitle = job?.title ?: "NA",
+                jobLocation = job?.jobLocationSlug ?: "NA",
+                salaryText = job?.primaryDetails?.salary ?: "NA",
+                phoneNumber = job?.customLink ?: "NA",
+                isBookmarked = job?.isBookmarked ?: false,
+                onJobCardClick = {
+                    context.toast("Job card Click")
+                },
+                onBookMarkClick = {
+                    job?.let { jobDetailsViewModel.bookMarkedClick(it) }
+                    context.toast("Bookmark Click")
+                }
             )
         }
     }
 
 }
 
-@Preview
+
 @Composable
 private fun JobDetailCard(
     modifier: Modifier = Modifier,
-    jobTitle: String = "Android dev",
-    jobLocation: String = "Noida",
-    salaryText: String = "100000 - 15000"
+    jobTitle: String,
+    jobLocation: String,
+    salaryText: String,
+    phoneNumber: String,
+    isBookmarked: Boolean,
+    onJobCardClick: () -> Unit,
+    onBookMarkClick: () -> Unit
 ) {
     Card(
         modifier = modifier,
@@ -92,7 +94,7 @@ private fun JobDetailCard(
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         ),
-        onClick = { /*TODO*/ },
+        onClick = { onJobCardClick() },
     ) {
         Column(
             modifier = Modifier
@@ -116,13 +118,15 @@ private fun JobDetailCard(
                         .padding(end = 24.dp)
                 )
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_bookmark_border_24),
+                    painter = painterResource(id = if (isBookmarked) R.drawable.ic_bookmark_saved_24 else R.drawable.ic_bookmark_border_24),
                     contentDescription = "bookmark",
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(0.1f)
                         .size(24.dp)
-                        .clickable { }
+                        .clickable {
+                            onBookMarkClick()
+                        }
                 )
 
             }
@@ -146,6 +150,15 @@ private fun JobDetailCard(
                     .padding(top = 8.dp)
                     .background(Color.Green.copy(0.3f), RoundedCornerShape(2.dp))
                     .padding(horizontal = 8.dp, vertical = 6.dp),
+            )
+
+            //phone number
+            Text(
+                text = phoneNumber,
+                fontSize = 14.sp,
+                color = Color.Black.copy(alpha = 0.5f),
+                modifier = Modifier
+                    .padding(top = 8.dp)
             )
         }
 

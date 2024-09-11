@@ -10,5 +10,6 @@ interface ApiServices {
     @GET("https://testapi.getlokalapp.com/common/jobs")
     suspend fun getJobDetails(
         @Query("page") page: Int,
+        @Query("pageSize") pageSize: Int,
     ): Response<JobDetailsResponse>
 }

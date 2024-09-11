@@ -1,95 +1,52 @@
 package process.com.jobassignment.viewmodels
 
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.launch
-import process.com.jobassignment.api.NetworkResult
-import process.com.jobassignment.datamodels.JobDetailsResponse
+import process.com.jobassignment.datamodels.Job
 import process.com.jobassignment.repository.JobDetailsRepository
-import retrofit2.Response
+import process.com.jobassignment.repository.JobPaginationDataSource
 import javax.inject.Inject
 
 @HiltViewModel
 class JobDetailsViewModel @Inject constructor(
     private val repository: JobDetailsRepository
 ) : ViewModel() {
-    val isLoading = mutableStateOf(false)
-    val isError = mutableStateOf(false)
-    private val viewModelScope = CoroutineScope(context = Dispatchers.IO)
-    val jobDetailsList = mutableStateOf<JobDetailsResponse>(JobDetailsResponse(results = ArrayList()))
 
-    private val _currentPage = MutableStateFlow(1)
-    val currentPage = _currentPage
+    // Maintain a set of bookmarked job IDs
+    private val _bookmarkedJobIds = MutableStateFlow<Set<Int?>>(emptySet())
 
-    fun updateCurrentPage(newPage:Int){
-        _currentPage.value = newPage
-    }
-
-    init {
-        fetchJobData()
-    }
-    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
-    private fun fetchJobData() {
-        viewModelScope.launch {
-            _currentPage
-                .debounce(1000)
-                .distinctUntilChanged()
-                .flatMapLatest { page ->
-                    flow {
-                        val result = repository.getJobDetails(page)
-                        emit(result)
-                    }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val jobsPagerData: Flow<PagingData<Job>> =
+        _bookmarkedJobIds.flatMapLatest {sets->
+            Pager(
+                config = PagingConfig(
+                    pageSize = 20,
+                ),
+                pagingSourceFactory = {
+                    JobPaginationDataSource(repository, sets)
                 }
-                .flowOn(Dispatchers.IO)
-                .collect { response ->
-                    handlePagedResponse(response)
-                }
+            ).flow
+                .cachedIn(viewModelScope)
+
         }
 
-    }
-
-    private fun handlePagedResponse(
-        result: NetworkResult<Response<JobDetailsResponse>>
-    ) {
-        when (result) {
-            is NetworkResult.Loading -> {
-               isLoading.value = true
-            }
-
-            is NetworkResult.Success -> {
-                isLoading.value = false
-                if (result.value.isSuccessful) {
-                    result.value.body()?.let {
-                        jobDetailsList.value = it
-                    }
-                }
-            }
-
-            is NetworkResult.Failure -> {
-                isError.value = true
-                isLoading.value = false
-                NetworkResult.Failure(
-                    result.isNetworkError,
-                    result.errorCode,
-                    result.errorBody
-                )
-
-            }
-
+    fun bookMarkedClick(job: Job) {
+        val updatedBookmarkedJobIds = if (_bookmarkedJobIds.value.contains(job.id)) {
+            _bookmarkedJobIds.value - job.id
+        } else {
+            _bookmarkedJobIds.value + job.id
         }
+        _bookmarkedJobIds.value = updatedBookmarkedJobIds
+
+        // Optionally, save bookmark status to repository or database if needed
     }
-
-
 }

@@ -56,7 +56,7 @@ data class Job(
     @SerializedName("fb_shares")
     val fbShares: Int?,
     @SerializedName("is_bookmarked")
-    val isBookmarked: Boolean?,
+    var isBookmarked: Boolean = false,
     @SerializedName("is_applied")
     val isApplied: Boolean?,
     @SerializedName("is_owner")
@@ -127,7 +127,8 @@ data class PrimaryDetails(
     @SerializedName("Fees_Charged")
     val feesCharged: String?,
     @SerializedName("Qualification")
-    val qualification: String?
+    val qualification: String?,
+    var isBookmarked: Boolean = false
 )
 
 

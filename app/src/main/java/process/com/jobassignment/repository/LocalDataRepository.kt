@@ -1,5 +1,6 @@
-package process.com.jobassignment.repository
 
+package process.com.jobassignment.repository
+/*
 import process.com.jobassignment.localDb.JobDatabase
 import javax.inject.Inject
 
@@ -8,4 +9,4 @@ class LocalDataRepository
 constructor(private val jobDatabase: JobDatabase){
 
 
-}
+}*/

@@ -1,4 +1,6 @@
+
 package process.com.jobassignment.localDb
+/*
 import androidx.lifecycle.LiveData
 import androidx.room.*
 @Dao
@@ -71,3 +73,4 @@ interface JobDao {
 
 
 
+*/

@@ -6,12 +6,10 @@ import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import process.com.jobassignment.api.ApiServices
-import process.com.jobassignment.localDb.JobDatabase
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
@@ -42,6 +40,7 @@ class NetworkModule @Inject constructor() {
     @Provides
     fun provideOkHttpClient(): OkHttpClient {
         val builder = OkHttpClient.Builder()
+            .retryOnConnectionFailure(true)
             .readTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)
             .connectTimeout(REQUEST_TIMEOUT, TimeUnit.SECONDS)
             .addInterceptor(httpLoggingInterceptor())
@@ -55,7 +54,7 @@ class NetworkModule @Inject constructor() {
     fun providesRetrofit(gson: Gson): Retrofit.Builder {
         return Retrofit.Builder()
             .addConverterFactory(GsonConverterFactory.create(gson))
-            .baseUrl("https://google.co.in")
+            .baseUrl("https://testapi.getlokalapp.com")
 
     }
 
@@ -68,10 +67,10 @@ class NetworkModule @Inject constructor() {
         return retrofitBuilder.client(okHttpClient).build().create(ApiServices::class.java)
     }
 
-    @Singleton
+/*    @Singleton
     @Provides
     fun providesJobDatabase(context : Context) : JobDatabase{
         return JobDatabase.getDatabase(context = context)
-    }
+    }*/
 
 }

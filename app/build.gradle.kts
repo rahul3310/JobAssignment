@@ -63,6 +63,9 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.ui.test.android)
+    implementation(libs.androidx.room.common)
+    implementation(libs.androidx.paging.common.android)
+    implementation(libs.androidx.paging.compose.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -102,20 +105,14 @@ dependencies {
     implementation (libs.kotlinx.coroutines.core)
     implementation (libs.kotlinx.coroutines.android)
     // Room components
-    implementation("androidx.room:room-runtime:2.5.0")
-    kapt("androidx.room:room-compiler:2.5.0")
+    implementation(libs.androidx.room.runtime)
+    kapt(libs.androidx.room.compiler)
 
     // Kotlin extensions for Room
-    implementation("androidx.room:room-ktx:2.5.0")
+    implementation(libs.androidx.room.ktx)
 
     // ViewModel and LiveData
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.0")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.0")
-
-    // Jetpack Compose (if not already included)
-    implementation("androidx.compose.ui:ui:1.5.0")
-    implementation("androidx.compose.runtime:runtime-livedata:1.5.0")
-
-
+    implementation(libs.androidx.lifecycle.viewmodel.ktx.v260)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
 
 }
