@@ -69,7 +69,11 @@ private fun <T : Any> PagingListContainer(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = "No items available.")
+            Text(
+                text = "No Job available.",
+                fontSize = 14.sp,
+                color = Color.Black.copy(alpha = 0.5f)
+            )
         }
     } else {
         listContent()

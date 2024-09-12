@@ -7,46 +7,66 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.launch
 import process.com.jobassignment.datamodels.Job
+import process.com.jobassignment.localdb.JobEntity
 import process.com.jobassignment.repository.JobDetailsRepository
 import process.com.jobassignment.repository.JobPaginationDataSource
+import process.com.jobassignment.repository.LocalRoomRepository
 import javax.inject.Inject
 
 @HiltViewModel
 class JobDetailsViewModel @Inject constructor(
-    private val repository: JobDetailsRepository
+    private val repository: JobDetailsRepository,
+    private val localRoomRepository: LocalRoomRepository
 ) : ViewModel() {
 
-    // Maintain a set of bookmarked job IDs
-    private val _bookmarkedJobIds = MutableStateFlow<Set<Int?>>(emptySet())
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val jobsPagerData: Flow<PagingData<Job>> =
-        _bookmarkedJobIds.flatMapLatest {sets->
-            Pager(
-                config = PagingConfig(
-                    pageSize = 20,
-                ),
-                pagingSourceFactory = {
-                    JobPaginationDataSource(repository, sets)
-                }
-            ).flow
-                .cachedIn(viewModelScope)
+    private val _bookmarkedJobIds = MutableStateFlow<Set<Long>>(emptySet())
 
+
+    init {
+        viewModelScope.launch(Dispatchers.IO) {
+            val bookmarkedJobs = localRoomRepository.getAllJobs().firstOrNull() ?: emptyList()
+            _bookmarkedJobIds.value = bookmarkedJobs.map { it.jobId }.toSet()
         }
+    }
+
+    val jobsPagerData: Flow<PagingData<Job>> =
+        Pager(
+            config = PagingConfig(
+                pageSize = 20,
+            ),
+            pagingSourceFactory = {
+                JobPaginationDataSource(repository, localRoomRepository)
+            }
+        ).flow
+
 
     fun bookMarkedClick(job: Job) {
-        val updatedBookmarkedJobIds = if (_bookmarkedJobIds.value.contains(job.id)) {
-            _bookmarkedJobIds.value - job.id
+        if (!_bookmarkedJobIds.value.contains(job.id?.toLong())) {
+            addJobInDB(job)
         } else {
-            _bookmarkedJobIds.value + job.id
+            job.id?.toLong()?.let { deleteJob(jobId = it) }
         }
-        _bookmarkedJobIds.value = updatedBookmarkedJobIds
+    }
 
-        // Optionally, save bookmark status to repository or database if needed
+    private fun addJobInDB(job: Job) {
+        viewModelScope.launch(Dispatchers.IO) {
+            localRoomRepository.addJob(job.toJobDetails())
+        }
+    }
+
+    private fun deleteJob(jobId: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            localRoomRepository.deleteJob(jobId)
+        }
     }
 }

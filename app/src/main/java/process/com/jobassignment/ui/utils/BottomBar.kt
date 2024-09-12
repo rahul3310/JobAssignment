@@ -38,16 +38,19 @@ fun BottomBar(
                     Text(text = screen.title)
                 },
                 icon = {
-                   Icon(painter = painterResource(screen.icon), contentDescription = "")
+                    Icon(painter = painterResource(screen.icon), contentDescription = "")
                 },
                 selected = currentRoute == screen.route,
                 onClick = {
-                    navController.navigate(screen.route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
+
+                    if (currentRoute != screen.route) {
+                        navController.navigate(screen.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
                         }
-                        launchSingleTop = true
-                        restoreState = true
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(
@@ -61,3 +64,4 @@ fun BottomBar(
         }
     }
 }
+

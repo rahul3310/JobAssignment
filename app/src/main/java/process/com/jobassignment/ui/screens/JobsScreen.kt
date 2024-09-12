@@ -17,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,8 +33,10 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import process.com.jobassignment.MainActivity
 import process.com.jobassignment.R
 import process.com.jobassignment.extensionfunctions.toast
+import process.com.jobassignment.navigation.Routes
 import process.com.jobassignment.ui.utils.PaginatedLazyColumn
 import process.com.jobassignment.ui.utils.TopAppBarCustom
+import process.com.jobassignment.ui.utils.navigateToJobDetailsScreen
 import process.com.jobassignment.viewmodels.JobDetailsViewModel
 
 
@@ -44,9 +47,16 @@ fun JobsScreen(
 ) {
 
     val context = LocalContext.current
+    val activity = context as MainActivity
     val jobsPagingData = jobDetailsViewModel.jobsPagerData.collectAsLazyPagingItems()
 
     Scaffold(
+        topBar = {
+            TopAppBarCustom(titleText = "Jobs",
+                onBackClick = {
+                    activity.finish()
+                })
+        }
     ) {
         PaginatedLazyColumn(
             modifier = Modifier.padding(it),
@@ -62,11 +72,15 @@ fun JobsScreen(
                 phoneNumber = job?.customLink ?: "NA",
                 isBookmarked = job?.isBookmarked ?: false,
                 onJobCardClick = {
-                    context.toast("Job card Click")
+                    if (job != null) {
+                        navigateToJobDetailsScreen(navController,job)
+                    }
                 },
                 onBookMarkClick = {
-                    job?.let { jobDetailsViewModel.bookMarkedClick(it) }
-                    context.toast("Bookmark Click")
+                    job?.let { item ->
+                        jobDetailsViewModel.bookMarkedClick(item)
+                    }
+                    jobsPagingData.refresh()
                 }
             )
         }
@@ -161,7 +175,5 @@ private fun JobDetailCard(
                     .padding(top = 8.dp)
             )
         }
-
-
     }
 }

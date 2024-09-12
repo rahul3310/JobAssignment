@@ -104,14 +104,9 @@ dependencies {
     //Coroutines
     implementation (libs.kotlinx.coroutines.core)
     implementation (libs.kotlinx.coroutines.android)
-    // Room components
     implementation(libs.androidx.room.runtime)
     kapt(libs.androidx.room.compiler)
-
-    // Kotlin extensions for Room
     implementation(libs.androidx.room.ktx)
-
-    // ViewModel and LiveData
     implementation(libs.androidx.lifecycle.viewmodel.ktx.v260)
     implementation(libs.androidx.lifecycle.livedata.ktx)
 

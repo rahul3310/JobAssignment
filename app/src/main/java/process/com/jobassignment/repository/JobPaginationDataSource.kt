@@ -3,12 +3,13 @@ package process.com.jobassignment.repository
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import kotlinx.coroutines.flow.firstOrNull
 import process.com.jobassignment.api.NetworkResult
 import process.com.jobassignment.datamodels.Job
 
 class JobPaginationDataSource(
     private val repository: JobDetailsRepository,
-    private val bookmarkedJobIds: Set<Int?>
+    private val localRoomRepository: LocalRoomRepository
 ) : PagingSource<Int, Job>() {
     override fun getRefreshKey(state: PagingState<Int, Job>): Int? {
         return state.anchorPosition?.apply {
@@ -24,10 +25,16 @@ class JobPaginationDataSource(
             when (val response = repository.getJobDetails(currentPage, pageSize)) {
                 is NetworkResult.Success -> {
                     val jobList = response.value.body()?.results
+                    val bookmarkedJobs = localRoomRepository.getAllJobs().firstOrNull() ?: emptyList()
+
+                    // Create a set of bookmarked job IDs for fast lookup
+                    val bookmarkedJobIds = bookmarkedJobs.map { it.jobId }.toSet()
+
+                    // Update the jobs with the `isBookmarked` status
                     val updatedJobs = jobList
                         ?.filter { job -> job.id != null }
                         ?.map { job ->
-                            job.copy(isBookmarked = bookmarkedJobIds.contains(job.id!!))
+                            job.copy(isBookmarked = bookmarkedJobIds.contains(job.id?.toLong()))
                         }
                     LoadResult.Page(
                         data = updatedJobs ?: emptyList(),

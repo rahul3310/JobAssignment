@@ -1,6 +1,7 @@
 package process.com.jobassignment.datamodels
 
 import com.google.gson.annotations.SerializedName
+import process.com.jobassignment.localdb.JobEntity
 
 data class Job(
     @SerializedName("id")
@@ -113,7 +114,18 @@ data class Job(
     val shouldShowLastContacted: Boolean?,
     @SerializedName("fees_charged")
     val feesCharged: Int?,
-)
+) {
+    fun toJobDetails(): JobEntity {
+        return JobEntity(
+            jobId = id?.toLong()!!,
+            jobTitle = title,
+            jobLocation = jobLocationSlug,
+            salary = primaryDetails?.salary,
+            phoneNumber = customLink
+        )
+
+    }
+}
 
 data class PrimaryDetails(
     @SerializedName("Place")
